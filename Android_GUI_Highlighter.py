@@ -7,10 +7,14 @@
 # Misc logic
 # -> for each XML and PNG pair, have a check that both exist.
 
+# py .\Android_GUI_Highlighter.py Programming-Assignment-Data
+
 import sys
 import os
 from PIL import Image
-import xml.etree.ElementTree as ET
+# import xml.etree.ElementTree as ET
+from lxml import etree
+import re
 
 
 '''
@@ -48,12 +52,16 @@ def execute_script() -> bool:
         for file in input_dir:
             # print(file)
 
-            if file[-4:] == ".xml": #is xml
+            if file[-4:] == ".xml":
                 print("file is xml:", file)
 
                 # copy new picture 
                 png_name = file[:-4]
-                #TODO: parse the xml for each png -> get the dict
+                #TODO: parse the xml for each png -> get the list
+                # print(os.path.join(str(input_dir), file))
+                # print(os.path.join(sys.argv[1], file))
+                xml_coords = parse_xml(os.path.join(sys.argv[1], file))
+                
                 #TODO: make the new file in the output dir, and give it as well as the dict of coords to the draw_boxes funct
 
 
@@ -69,10 +77,38 @@ def execute_script() -> bool:
     Parses the XML metadata files.
     
     Input: the XML filename
-    Output: dictionary of coordinates of form {1:[x1, y1, x2, y2], 2:[x1, y1, x2, y2], 3:[]}
+    Output: list of coordinates of form [[x1, y1, x2, y2], [x1, y1, x2, y2]]
 '''
-def parse_xml(filename: str) -> dict:
-    tree = ET.parse()
+def parse_xml(filename: str) -> list:
+
+    try:
+        # recover tag helps with broken XML tags
+        parser = etree.XMLParser(recover=True)
+        tree = etree.parse(filename, parser)
+        # root = tree.getroot()
+
+        # get coords from xml attribute
+        clickable_list = tree.findall(".//node[@clickable='true']")
+        coords = []
+        
+        # turn str of form '[x1,y1][x2,y2]' into [x1,y1,x2,y2]
+        for elem in clickable_list:
+            str_coords = elem.attrib['bounds']
+
+            points = re.findall(r'\d+', str_coords) #god I hate regex
+            coordinates = [int(num) for num in points]
+
+            coords.append(coordinates)
+        
+        # print("coords = ", coords)
+        return coords
+
+
+    except Exception as err:
+        print(err)
+        print("Encountered exception ", err, " while parsing xml. Exiting program.")
+        exit(1)
+
     
 
 '''
@@ -81,14 +117,14 @@ def parse_xml(filename: str) -> dict:
     Input: dictionary of coordinates to draw, and a path to the file in which to edit
     Output: boolean indicating success/failure
 '''
-def draw_boxes(coords: dict, file_to_draw: str) -> bool:
+def draw_boxes(coords: list, file_to_draw: str) -> bool:
     #TODO: draw boxes on the image see ImageDraw.recatngle
     pass
 
 
 def main():
     out = execute_script()
-    print(f"****** Script executed successfully with exit code: { 1 if out else 0 }. Exiting... *******")
+    print(f"****** Script executed with exit code: { 0 if out else 1 }. Exiting... *******")
     exit(out)
 
 
