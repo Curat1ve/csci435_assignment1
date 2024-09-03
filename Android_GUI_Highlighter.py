@@ -49,23 +49,19 @@ def execute_script() -> bool:
         print(f"**** Output directory created at: {os.path.join(output_path, output_dir)} ****")
         #iterate over files
         for file in input_dir:
-            # print(file)
 
             if file[-4:] == ".xml":
-                print("file is xml:", file)
+                print("*** Working on file: ", file)
 
-                # copy new picture 
+                # copy the associated picture into output directory
                 png_name = str(file[:-4] + ".png")
                 shutil.copy2(os.path.join(sys.argv[1], png_name), os.path.join(output_path, output_dir))
-                
-                #TODO: parse the xml for each png -> get the list
-                # print(os.path.join(str(input_dir), file))
-                # print(os.path.join(sys.argv[1], file))
-                xml_coords = parse_xml(os.path.join(sys.argv[1], file))
 
+                # get coordinates and then draw on them
+                xml_coords = parse_xml(os.path.join(sys.argv[1], file))
                 draw_boxes(xml_coords, os.path.join(output_path, output_dir, png_name))
 
-                #TODO: make the new file in the output dir, and give it as well as the dict of coords to the draw_boxes funct
+                print("*** File complete. ***")
 
         return True
 
@@ -84,7 +80,6 @@ def parse_xml(filename: str) -> list:
         # recover tag helps with broken XML tags
         parser = etree.XMLParser(recover=True)
         tree = etree.parse(filename, parser)
-        # root = tree.getroot()
 
         # get coords from xml attribute
         clickable_list = tree.findall(".//node[@clickable='true']")
@@ -99,7 +94,6 @@ def parse_xml(filename: str) -> list:
 
             coords.append(coordinates)
         
-        # print("coords = ", coords)
         return coords
 
     except Exception as err:
@@ -114,20 +108,19 @@ def parse_xml(filename: str) -> list:
     Input: dictionary of coordinates to draw, and a path to the file in which to edit
     Output: boolean indicating success/failure
 '''
-def draw_boxes(coords: list, file_to_draw: str) -> bool:
+def draw_boxes(coords: list, file_to_draw: str):
     try:
-        print("drawin boxes")
+        print("** Drawing on file: ", file_to_draw)
 
         img = Image.open(file_to_draw)
-        print("file to draw", file_to_draw)
         draw = ImageDraw.Draw(img) 
 
+        # draw each rectangle
         for item in coords:
-            # print("item = ", item)
             draw.rectangle(xy = item, 
                            outline = (255, 255, 0), 
                            width = 10)
-        # img.show()
+            
         img.save(file_to_draw)
         img.close()
 
@@ -135,7 +128,6 @@ def draw_boxes(coords: list, file_to_draw: str) -> bool:
         print(err)
         print("Encountered exception ", err, " while drawing boxes. Exiting program.")
         exit(1)
-
 
 
 def main():
