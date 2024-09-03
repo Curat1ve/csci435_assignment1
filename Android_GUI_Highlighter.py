@@ -1,14 +1,4 @@
-# Invokation: CLI python my_script <path_to_dir>
-# -> outputs a dir in the same location this script is w/ annotated images
-# XML Parsing: use xml.etree.elementTree ..... consider using the XPath support it has
-# -> Need error handling for broken XML tags
-# Drawing: create duplicate pngs with designated names
-# -> Use Pillow (PIL fork) for drawing, pulling coords from XML
-# Misc logic
-# -> for each XML and PNG pair, have a check that both exist.
-
 # py .\Android_GUI_Highlighter.py Programming-Assignment-Data
-
 import sys
 import os
 from PIL import Image, ImageDraw
