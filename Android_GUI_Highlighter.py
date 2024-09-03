@@ -11,11 +11,10 @@
 
 import sys
 import os
-from PIL import Image
-# import xml.etree.ElementTree as ET
+from PIL import Image, ImageDraw
 from lxml import etree
 import re
-
+import shutil
 
 '''
     Execution of script. Returns exit status. 
@@ -56,16 +55,17 @@ def execute_script() -> bool:
                 print("file is xml:", file)
 
                 # copy new picture 
-                png_name = file[:-4]
+                png_name = str(file[:-4] + ".png")
+                shutil.copy2(os.path.join(sys.argv[1], png_name), os.path.join(output_path, output_dir))
+                
                 #TODO: parse the xml for each png -> get the list
                 # print(os.path.join(str(input_dir), file))
                 # print(os.path.join(sys.argv[1], file))
                 xml_coords = parse_xml(os.path.join(sys.argv[1], file))
-                
+
+                draw_boxes(xml_coords, os.path.join(output_path, output_dir, png_name))
+
                 #TODO: make the new file in the output dir, and give it as well as the dict of coords to the draw_boxes funct
-
-
-                
 
         return True
 
@@ -80,7 +80,6 @@ def execute_script() -> bool:
     Output: list of coordinates of form [[x1, y1, x2, y2], [x1, y1, x2, y2]]
 '''
 def parse_xml(filename: str) -> list:
-
     try:
         # recover tag helps with broken XML tags
         parser = etree.XMLParser(recover=True)
@@ -103,13 +102,11 @@ def parse_xml(filename: str) -> list:
         # print("coords = ", coords)
         return coords
 
-
     except Exception as err:
         print(err)
         print("Encountered exception ", err, " while parsing xml. Exiting program.")
         exit(1)
 
-    
 
 '''
     Draws boxes on the pngs based on the metadata in their XMLs.
@@ -118,8 +115,27 @@ def parse_xml(filename: str) -> list:
     Output: boolean indicating success/failure
 '''
 def draw_boxes(coords: list, file_to_draw: str) -> bool:
-    #TODO: draw boxes on the image see ImageDraw.recatngle
-    pass
+    try:
+        print("drawin boxes")
+
+        img = Image.open(file_to_draw)
+        print("file to draw", file_to_draw)
+        draw = ImageDraw.Draw(img) 
+
+        for item in coords:
+            # print("item = ", item)
+            draw.rectangle(xy = item, 
+                           outline = (255, 255, 0), 
+                           width = 10)
+        # img.show()
+        img.save(file_to_draw)
+        img.close()
+
+    except Exception as err:
+        print(err)
+        print("Encountered exception ", err, " while drawing boxes. Exiting program.")
+        exit(1)
+
 
 
 def main():
