@@ -21,7 +21,7 @@ All other referenced libraries come with Python 3.12.5
 
 ## Running the Program
 
-To run the program in Windows, use the following command, assuming you're in the directory of the project: py <Android_GUI_Highlighter.py> <Programming-Assignment-Data>
+To run the program in Windows, use the following command, assuming you're in the directory of the project: py Android_GUI_Highlighter.py Programming-Assignment-Data
 
-In Linux / MacOS, assuming you have python added to your path, run: python <Android_GUI_Highlighter.py> <Programming-Assignment-Data>
+In Linux / MacOS, assuming you have python added to your path, run: python Android_GUI_Highlighter.py Programming-Assignment-Data
 
